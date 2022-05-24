@@ -53,9 +53,9 @@ int main() {
     WaitForMultipleObjects(numberOfProcesees, hStartEvents, TRUE, INFINITE);
     ReleaseMutex(hCurrentProcess);
     while (option != 2) {
-	    WaitForSingleObject(hCurrentProcess, INFINITE);                    // ждем, пока будет свободен мютекс для его захвата
-	    response = WaitForSingleObject(hReadAccessSemaphore, DELAY);       // ждем, пока в файле появятся записи
-	    if (response == WAIT_TIMEOUT) {
+        WaitForSingleObject(hCurrentProcess, INFINITE);                    // ждем, пока будет свободен мютекс для его захвата
+        response = WaitForSingleObject(hReadAccessSemaphore, DELAY);       // ждем, пока в файле появятся записи
+        if (response == WAIT_TIMEOUT) {
             std::cout << "[warning] Timeout: no response!" << std::endl;
             break;
         }
