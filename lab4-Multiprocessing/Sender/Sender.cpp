@@ -8,19 +8,16 @@
 
 int main(int argc, char* argv[]) {
     std::ofstream   binOutputStream;
-    std::string		binFileName             { argv[1] };
+    std::string     binFileName             { argv[1] };
     std::string     message;
     char            messageCharset[20]      {    };
     const int       MESSAGE_LENGTH          { 20 };
-    const int       DELAY                   { 3000 };
     int             option                  { 0 };
-    int				proccessID              { std::stoi(argv[2]) };
+    int             proccessID              { std::stoi(argv[2]) };
     HANDLE          hReadAccessSemaphore    = OpenSemaphore(SEMAPHORE_ALL_ACCESS, FALSE, L"Read Access Semaphore");
     HANDLE          hWriteAccessSemaphore   = OpenSemaphore(SEMAPHORE_ALL_ACCESS, FALSE, L"Write Access Semaphore");
     HANDLE          hCurrentProcess         = OpenMutex(MUTEX_ALL_ACCESS, FALSE , L"Current Process Owner");
-    HANDLE          senderStartEvent        = OpenEvent(EVENT_ALL_ACCESS,
-                                                        FALSE,
-                                                        (LPCWSTR)("START PROCESS" + proccessID));
+    HANDLE          senderStartEvent        = OpenEvent(EVENT_ALL_ACCESS, FALSE, (LPCWSTR)("START PROCESS" + proccessID));
 
     SetEvent(senderStartEvent);
     std::cout << "You are currently in Sender.exe number " << proccessID << " process \n" << std::endl;
@@ -28,9 +25,9 @@ int main(int argc, char* argv[]) {
     while (option != 2) {
         WaitForSingleObject(hWriteAccessSemaphore, INFINITE);
         WaitForSingleObject(hCurrentProcess, INFINITE);
-        std::cout << "Options: \n" <<
-            "1. Write messages " + binFileName + " (max. message length is 20 characters) \n" <<
-            "2. Exit program \n";
+        std::cout << "Options: \n" << 
+		"1. Write messages " + binFileName + " (max. message length is 20 characters) \n" <<
+		"2. Exit program \n";
         std::cin >> option;
         switch (option) {
         case 1:
