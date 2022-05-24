@@ -10,7 +10,7 @@ bool is_empty(std::ifstream& pFile)
 }
 
 int main() {
-	STARTUPINFO			si{0};
+	STARTUPINFO			si						{ 0 };
 	PROCESS_INFORMATION pi						{ 0 };				
 	std::ifstream		binInputStream;
 	std::string			binFileName;
@@ -22,6 +22,8 @@ int main() {
 	HANDLE				hCurrentProcess			{ 0 };
 	HANDLE				hReadAccessSemaphore	{ 0 };
 	HANDLE				hWriteAccessSemaphore	{ 0 };
+	DWORD				response				{ 0 };
+	const short			DELAY					{ 25'000 };
 	const short			messageLength			{ 20 };	
 	char				message[20]				{   };
 	int					numberOfProcesees		{ 0 };
@@ -34,7 +36,7 @@ int main() {
 	std::cout << "Input number of entries: "; std::cin >> numberOfEntries;
 	std::cout << "Input number of Sender processes: "; std::cin >> numberOfProcesees;
 
-	hCurrentProcess = CreateMutex(NULL, TRUE, L"Current Process Owner");
+	//hCurrentProcess = CreateMutex(NULL, TRUE, L"Current Process Owner");
 	hReadAccessSemaphore = CreateSemaphore(NULL, 0, numberOfEntries, L"Read Access Semaphore");
 	hWriteAccessSemaphore = CreateSemaphore(NULL, numberOfEntries, numberOfEntries, L"Write Access Semaphore");
 
@@ -60,24 +62,29 @@ int main() {
 			std::cout << "Unable to create \"Sender.exe\" process" << std::endl;
 		CloseHandle(pi.hThread);
 		hProcesses[i] = pi.hProcess;
-	}
+	}	
 
 	WaitForMultipleObjects(numberOfProcesees, hStartEvents, TRUE, INFINITE);
 	ReleaseMutex(hCurrentProcess);
 	while (option != 2) {
-		WaitForSingleObject(hReadAccessSemaphore, INFINITE);									// ждем, пока в файле появятся записи
 		WaitForSingleObject(hCurrentProcess, INFINITE);											// ждем, пока будет свободен мютекс для его захвата
+		response = WaitForSingleObject(hReadAccessSemaphore, DELAY);							// ждем, пока в файле появятся записи
+		if (response == WAIT_TIMEOUT) {
+			std::cout << "[warning] Timeout: no response!" << std::endl;
+			break;
+		}
 		std::cout << "Options: \n" <<
 			"1. Read " + binFileName + '\n' <<
 			"2. Exit programm \n";
 		std::cin >> option;
 		switch (option) {
 		case 1:		
+			option = 0;
 			binInputStream.open(binFileName, std::ios::binary);									// открываем файл для чтения
 			binInputStream.seekg(bytesRead);													// ставим каретку на отступ равный количеству считанных байт
-			std::cout << binInputStream.tellg();
-			if (binInputStream.tellg() != 0 && !binInputStream.eof()) {														// если файл пуст (достигнут конец файла), 
+			if (binInputStream.tellg() != 0 || !binInputStream.eof()) {							// если файл пуст (достигнут конец файла), 
 				binInputStream.read((char*)&message, sizeof(message));							// то читаем сообщение
+				std::cout << "Message: ";
 				for (std::size_t i = 0; i < messageLength; i++)
 					std::cout << message[i];
 				std::cout << std::endl;
@@ -85,15 +92,12 @@ int main() {
 				bytesRead += messageLength;
 				ReleaseSemaphore(hWriteAccessSemaphore, 1, NULL);								// грубо говоря объявляем, что аоявилось +1 место для записи в файл
 			}	
-			else {																				// иначе больше нечего читать и процесс "отпускает" мьютекс текущего владельца процессом
-				ReleaseMutex(hCurrentProcess);
+			else																				// иначе больше нечего читать и процесс "отпускает" мьютекс текущего владельца процессом
 				continue;
-			}
 			break;
 		case 2:
 			std::cout << "Exiting process..." << std::endl;
 			Sleep(500);
-			ReleaseMutex(hCurrentProcess);
 			break;
 		}
 	}
