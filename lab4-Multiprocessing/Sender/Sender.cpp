@@ -4,8 +4,6 @@
 #include "Windows.h"
 
 
-
-
 int main(int argc, char* argv[]) {
     std::ofstream   binOutputStream;
     std::string     binFileName             { argv[1] };
@@ -26,8 +24,8 @@ int main(int argc, char* argv[]) {
         WaitForSingleObject(hWriteAccessSemaphore, INFINITE);
         WaitForSingleObject(hCurrentProcess, INFINITE);
         std::cout << "Options: \n" << 
-	    "1. Write messages " + binFileName + " (max. message length is 20 characters) \n" <<
-	    "2. Exit program \n";
+        "1. Write messages " + binFileName + " (max. message length is 20 characters) \n" <<
+        "2. Exit program \n";
         std::cin >> option;
         switch (option) {
         case 1:
