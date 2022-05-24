@@ -5,26 +5,26 @@
 
 
 int main() {
-	STARTUPINFO         si                      { 0 };
-	PROCESS_INFORMATION pi                      { 0 };				
-	std::ifstream       binInputStream;
-	std::string         binFileName;
-	std::string         strCmdLineRequest;
-	std::wstring        wstrCmdLineRequest;
-	LPWSTR              lpwCmdLineRequest       { nullptr };
-	HANDLE*             hProcesses              { nullptr };
-	HANDLE*             hStartEvents            { nullptr };
-	HANDLE              hCurrentProcess         { 0 };
-	HANDLE              hReadAccessSemaphore    { 0 };
-	HANDLE              hWriteAccessSemaphore   { 0 };
-	DWORD               response                { 0 };
-	const short         DELAY                   { 25'000 };
-	const short         messageLength           { 20 };	
-	char                message[20]             {   };
-	int                 numberOfProcesees       { 0 };
-	int                 numberOfEntries         { 0 };
-	int                 bytesRead               { 0 };
-	int                 option                  { 0 };
+    STARTUPINFO         si                      { 0 };
+    PROCESS_INFORMATION pi                      { 0 };				
+    std::ifstream       binInputStream;
+    std::string         binFileName;
+    std::string         strCmdLineRequest;
+    std::wstring        wstrCmdLineRequest;
+    LPWSTR              lpwCmdLineRequest       { nullptr };
+    HANDLE*             hProcesses              { nullptr };
+    HANDLE*             hStartEvents            { nullptr };
+    HANDLE              hCurrentProcess         { 0 };
+    HANDLE              hReadAccessSemaphore    { 0 };
+    HANDLE              hWriteAccessSemaphore   { 0 };
+    DWORD               response                { 0 };
+    const short         DELAY                   { 25'000 };
+    const short         messageLength           { 20 };	
+    char                message[20]             {   };
+    int                 numberOfProcesees       { 0 };
+    int                 numberOfEntries         { 0 };
+    int                 bytesRead               { 0 };
+    int                 option                  { 0 };
 
 
     std::cout << "Input .bin file name: "; std::cin >> binFileName;
@@ -38,17 +38,17 @@ int main() {
     hProcesses = new HANDLE[numberOfProcesees];
     hStartEvents = new HANDLE[numberOfProcesees];
     for (std::size_t i = 0; i < numberOfProcesees; i++)
-	    hStartEvents[i] = CreateEvent(NULL, TRUE, FALSE, (LPCWSTR)("START PROCESS" + i));
+        hStartEvents[i] = CreateEvent(NULL, TRUE, FALSE, (LPCWSTR)("START PROCESS" + i));
 
     for (std::size_t i = 0; i < numberOfProcesees; i++) {
-	    strCmdLineRequest = std::string("Sender.exe") + " " + binFileName + " " + std::to_string(i);
-	    wstrCmdLineRequest = std::wstring(strCmdLineRequest.begin(), strCmdLineRequest.end());
-	    lpwCmdLineRequest = &wstrCmdLineRequest[0];
-	    if (!CreateProcess(NULL, lpwCmdLineRequest, NULL, NULL, TRUE, CREATE_NEW_CONSOLE, NULL, NULL, &si, &pi))
-	        std::cout << "Unable to create \"Sender.exe\" process" << std::endl;
-	    CloseHandle(pi.hThread);
-	    hProcesses[i] = pi.hProcess;
-	}	
+        strCmdLineRequest = std::string("Sender.exe") + " " + binFileName + " " + std::to_string(i);
+        wstrCmdLineRequest = std::wstring(strCmdLineRequest.begin(), strCmdLineRequest.end());
+        lpwCmdLineRequest = &wstrCmdLineRequest[0];
+        if (!CreateProcess(NULL, lpwCmdLineRequest, NULL, NULL, TRUE, CREATE_NEW_CONSOLE, NULL, NULL, &si, &pi))
+            std::cout << "Unable to create \"Sender.exe\" process" << std::endl;
+        CloseHandle(pi.hThread);
+        hProcesses[i] = pi.hProcess;
+    }	
 
     WaitForMultipleObjects(numberOfProcesees, hStartEvents, TRUE, INFINITE);
     ReleaseMutex(hCurrentProcess);
