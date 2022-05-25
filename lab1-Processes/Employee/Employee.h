@@ -6,5 +6,5 @@ struct Employee {
 
     int             id;
     char            name[10];
-    double        	hours;
+    double          hours;
 };
